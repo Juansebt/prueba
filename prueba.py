@@ -1,6 +1,7 @@
 import cv2
 import pygame
 import numpy as np
+import os
 
 # Función para cargar la imagen desde OpenCV y convertirla a RGB
 def cargar_imagen_ruta(ruta):
@@ -141,6 +142,8 @@ def main():
         ruta_audio = 'music.mp3'  # Reemplaza con la ruta de tu archivo de audio
         pygame.mixer.music.load(ruta_audio)
         pygame.mixer.music.play(-1)  # Reproduce el audio en bucle
+        
+        os.environ['SDL_VIDEO_CENTERED'] = '1' #Centrar la ventana de la imagen
 
         # Crear una ventana de Pygame con las dimensiones de la imagen
         pantalla = pygame.display.set_mode((imagen.shape[1], imagen.shape[0]))
