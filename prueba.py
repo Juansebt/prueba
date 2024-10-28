@@ -135,6 +135,12 @@ def main():
 
         # Convertir la imagen a formato compatible con Pygame
         imagen_pygame = pygame.surfarray.make_surface(imagen)
+        
+        # Inicializar Pygame para sonido
+        pygame.mixer.init()
+        ruta_audio = 'music.mp3'  # Reemplaza con la ruta de tu archivo de audio
+        pygame.mixer.music.load(ruta_audio)
+        pygame.mixer.music.play(-1)  # Reproduce el audio en bucle
 
         # Crear una ventana de Pygame con las dimensiones de la imagen
         pantalla = pygame.display.set_mode((imagen.shape[1], imagen.shape[0]))
