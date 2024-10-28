@@ -143,7 +143,8 @@ def main():
         pygame.mixer.music.load(ruta_audio)
         pygame.mixer.music.play(-1)  # Reproduce el audio en bucle
         
-        os.environ['SDL_VIDEO_CENTERED'] = '1' #Centrar la ventana de la imagen
+        # Configurar la variable de entorno para centrar la ventana
+        os.environ['SDL_VIDEO_CENTERED'] = '1'
 
         # Crear una ventana de Pygame con las dimensiones de la imagen
         pantalla = pygame.display.set_mode((imagen.shape[1], imagen.shape[0]))
@@ -154,19 +155,40 @@ def main():
         angulo = 0
         reloj = pygame.time.Clock()  # Control de FPS
 
+        # Variables para el efecto de zoom
+        escala = 1.0
+        incremento = 0.02  # Cambiar el tamaño de la imagen en cada fotograma
+        max_escala = 1.2   # Escala máxima
+        min_escala = 0.8    # Escala mínima
+        creciendo = True    # Indica si estamos acercando o alejando
+
         while ejecutando:
             for evento in pygame.event.get():
                 if evento.type == pygame.QUIT:
                     ejecutando = False
+                    # continue # Ignorar el evento de cierre de la ventana
 
             # Rotar la imagen
             imagen_rotada = pygame.transform.rotate(imagen_pygame, angulo)
             angulo += 1
 
-            # Centrar la imagen en la pantalla
-            rect = imagen_rotada.get_rect(center=(pantalla.get_width() // 2, pantalla.get_height() // 2))
+            # Actualizar la escala para el efecto de zoom
+            if creciendo:
+                escala += incremento
+                if escala >= max_escala:
+                    creciendo = False
+            else:
+                escala -= incremento
+                if escala <= min_escala:
+                    creciendo = True
+
+            # Escalar la imagen
+            imagen_escala = pygame.transform.scale(imagen_rotada, (int(imagen_rotada.get_width() * escala), int(imagen_rotada.get_height() * escala)))
+
+            # Centrar la imagen escalada en la pantalla
+            rect = imagen_escala.get_rect(center=(pantalla.get_width() // 2, pantalla.get_height() // 2))
             pantalla.fill((0, 0, 0))  # Limpiar la pantalla antes de dibujar
-            pantalla.blit(imagen_rotada, rect)
+            pantalla.blit(imagen_escala, rect)
 
             # Actualizar la pantalla
             pygame.display.flip()
