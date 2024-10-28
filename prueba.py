@@ -11,19 +11,32 @@ def cargar_imagen_ruta(ruta):
     imagen = cv2.cvtColor(imagen, cv2.COLOR_BGR2RGB)
     return imagen
 
+# Función para dibujar un botón con esquinas redondeadas
+def dibujar_boton_redondeado(pantalla, rect, color, texto, fuente):
+    # Dibujar el fondo del botón
+    pygame.draw.rect(pantalla, color, rect, border_radius=7)  # Esquinas redondeadas
+
+    # Centrar el texto en el botón
+    texto_superficie = fuente.render(texto, True, (255, 255, 255))
+    texto_rect = texto_superficie.get_rect(center=rect.center)  # Centrar el texto en el botón
+    pantalla.blit(texto_superficie, texto_rect)  # Mostrar el texto centrado en el botón
+
 # Función para mostrar un cuadro de entrada en Pygame para obtener el peso del usuario
 def pedir_peso_pygame():
     pygame.init()
-    pantalla = pygame.display.set_mode((400, 200))
-    pygame.display.set_caption("Ingrese su peso")
+    pantalla = pygame.display.set_mode((400, 250))
+    pygame.display.set_caption("Ingresar peso")
 
     # Definir fuente y colores
     fuente = pygame.font.Font(None, 50)
     fuente_indicacion = pygame.font.Font(None, 40)  # Fuente para la indicación
+    fuente_boton = pygame.font.Font(None, 40)
     color_texto = (255, 255, 255)
     color_fondo = (0, 0, 0)
     color_cuadro = (200, 200, 200)
     color_cuadro_activo = (255, 255, 255)
+    color_boton_normal = (50, 150, 50)
+    color_boton_hover = (70, 200, 70)  # Color cuando el mouse está sobre el botón
 
     # Cuadro de texto y variables de entrada
     cuadro = pygame.Rect(50, 100, 300, 50)
@@ -33,6 +46,9 @@ def pedir_peso_pygame():
     terminado = False
     peso = None
 
+    # Definir botón de enviar
+    boton = pygame.Rect(150, 180, 100, 50)  # Posición y tamaño del botón
+
     while not terminado:
         for evento in pygame.event.get():
             if evento.type == pygame.QUIT:
@@ -40,7 +56,7 @@ def pedir_peso_pygame():
                 return None
 
             if evento.type == pygame.MOUSEBUTTONDOWN:
-                # Activar el cuadro de texto si el usuario hace clic en él
+                # Verificar si se hace clic en el cuadro de texto
                 if cuadro.collidepoint(evento.pos):
                     activo = True
                     cuadro_color = color_cuadro_activo
@@ -48,24 +64,28 @@ def pedir_peso_pygame():
                     activo = False
                     cuadro_color = color_cuadro
 
-            if evento.type == pygame.KEYDOWN:
-                if activo:
-                    if evento.key == pygame.K_RETURN:
-                        try:
-                            peso = float(texto)
-                            terminado = True  # Terminar cuando se ingrese el peso
-                        except ValueError:
-                            texto = ''  # Limpiar si el texto no es un número válido
-                    elif evento.key == pygame.K_BACKSPACE:
-                        texto = texto[:-1]
-                    else:
+                # Verificar si se hace clic en el botón de enviar
+                if boton.collidepoint(evento.pos):
+                    try:
+                        peso = float(texto)
+                        terminado = True  # Terminar cuando se presiona el botón de enviar
+                    except ValueError:
+                        texto = ''  # Limpiar si el texto no es un número válido
+
+            if evento.type == pygame.KEYDOWN and activo:
+                # Validar que solo se puedan ingresar números y un punto decimal
+                if evento.key == pygame.K_BACKSPACE:
+                    texto = texto[:-1]
+                else:
+                    # Solo permitir dígitos o un único punto decimal
+                    if evento.unicode.isdigit() or (evento.unicode == '.' and '.' not in texto):
                         texto += evento.unicode
 
         # Dibujar pantalla
         pantalla.fill(color_fondo)
 
         # Renderizar la indicación
-        indicacion_superficie = fuente_indicacion.render("Ingrese su peso:", True, color_texto)
+        indicacion_superficie = fuente_indicacion.render("Ingrese su peso en KG:", True, color_texto)
         pantalla.blit(indicacion_superficie, (50, 30))  # Mostrar indicación arriba del campo de texto
 
         # Renderizar el texto actual en el cuadro de entrada
@@ -80,6 +100,16 @@ def pedir_peso_pygame():
 
         # Dibujar cuadro de texto
         pygame.draw.rect(pantalla, cuadro_color, cuadro, 2)
+
+        # Detectar el estado del mouse
+        mouse_pos = pygame.mouse.get_pos()
+        if boton.collidepoint(mouse_pos):
+            boton_color = color_boton_hover  # Cambiar color al pasar el mouse
+        else:
+            boton_color = color_boton_normal  # Color normal
+
+        # Dibujar el botón de enviar con esquinas redondeadas
+        dibujar_boton_redondeado(pantalla, boton, boton_color, "Enviar", fuente_boton)
 
         # Actualizar la pantalla
         pygame.display.flip()
@@ -108,6 +138,7 @@ def main():
 
         # Crear una ventana de Pygame con las dimensiones de la imagen
         pantalla = pygame.display.set_mode((imagen.shape[1], imagen.shape[0]))
+        pygame.display.set_caption("GORD@ DE MIERDA")
 
         # Bucle principal de Pygame
         ejecutando = True
