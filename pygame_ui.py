@@ -1,6 +1,8 @@
 # Este módulo manejará la interfaz de usuario de Pygame.
 
+import numpy as np
 import pygame
+import cv2
 from constants import *
 
 def dibujar_boton_redondeado(pantalla, rect, color, texto, fuente):
@@ -20,7 +22,7 @@ def dibujar_boton_redondeado(pantalla, rect, color, texto, fuente):
     texto_rect = texto_superficie.get_rect(center=rect.center) # Centrar el texto en el botón
     pantalla.blit(texto_superficie, texto_rect) # Mostrar el texto centrado en el botón
 
-def pedir_peso_pygame():
+def pedir_peso():
     """
     Función para mostrar una interfaz gráfica en Pygame para solicitar al usuario que ingrese su peso en kilogramos.
 
@@ -107,3 +109,54 @@ def pedir_peso_pygame():
         pygame.display.flip()
 
     return peso
+
+# Función para mostrar la ventana de carga
+def mostrar_loading(pantalla, ruta_video):
+    """
+    Muestra una ventana de carga en Pygame utilizando un video como indicador de progreso.
+
+    Args:
+        pantalla (pygame.Surface): La superficie de Pygame donde se mostrará el video. Debe estar previamente inicializada.
+        ruta_video (str): Ruta del archivo de video que se utilizará para la animación de carga.
+    """
+    # Usar OpenCV para capturar el video
+    captura_video = cv2.VideoCapture(ruta_video)
+    
+    pygame.display.set_caption("Procesando datos...")
+    
+    if not captura_video.isOpened():
+        print(f"No se pudo abrir el archivo de video: {ruta_video}")
+        return
+    
+    while True:
+        # Leer un frame del video
+        ret, frame = captura_video.read()
+        if not ret:
+            break  # Salir si no hay más frames o falla la lectura
+        
+        # Invertir la imagen para corregir el sentido (opcional, dependiendo del video)
+        frame = cv2.flip(frame, 1)
+
+        # Convertir el frame a formato RGB para Pygame
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        frame_pygame = pygame.surfarray.make_surface(np.rot90(frame_rgb))
+
+        # Ajustar el tamaño del frame al tamaño de la ventana de carga
+        frame_escalado = pygame.transform.scale(frame_pygame, (400, 250))
+
+        # Dibujar el frame del video en la ventana
+        pantalla.blit(frame_escalado, (0, 0))
+        pygame.display.flip()
+
+        # Procesar eventos para evitar que la ventana se congele
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                captura_video.release()
+                pygame.quit()
+                return
+
+        # Añadir un pequeño retraso para simular la velocidad del video
+        pygame.time.delay(10)
+
+    captura_video.release()
+    

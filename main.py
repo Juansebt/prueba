@@ -3,14 +3,14 @@
 
 import pygame
 import os
-from image_loader import cargar_imagen_ruta
-from pygame_ui import pedir_peso_pygame
-from audio_handler import inicializar_audio
+from image import cargar_imagen_ruta
+from pygame_ui import pedir_peso, mostrar_loading
+from audio import inicializar_audio
 
 def main():
     """
     Función principal que coordina la ejecución de la interfaz gráfica para solicitar el peso del usuario 
-    y mostrar una imagen animada si el peso es mayor a 100 kg.
+    y mostrar una imagen animada si el peso es mayor o igual a 100 kg.
     
     La función realiza los siguientes pasos:
     1. Solicita al usuario que ingrese su peso a través de una interfaz de Pygame.
@@ -19,14 +19,21 @@ def main():
     3. Si el usuario cierra la ventana sin ingresar un peso, se muestra un mensaje en la consola.
     4. Si el peso es 100 kg o menos, se notifica al usuario con un mensaje en la consola.
     """
+    pygame.init()
+    
     # Pedir el peso llamando a la función del módulo pygame_ui
-    peso = pedir_peso_pygame()
+    peso = pedir_peso()
     if peso is None:
         print("Se cerró la ventana sin ingresar un peso.")
         return
+    
+    # Crear ventana de carga y mostrar el video
+    pantalla = pygame.display.set_mode((400, 250))
+    ruta_video = 'media/barra_carga.mp4'  # Ruta al video de carga
+    mostrar_loading(pantalla, ruta_video)
 
     # Comprobar si el peso supera los 100 kg
-    if peso > 100:
+    if peso >= 100:
         ruta_imagen = 'media/pic.jpg'  # Cargar la imagen
         imagen = cargar_imagen_ruta(ruta_imagen)
 
